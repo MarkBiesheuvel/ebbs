@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+
+
+<script>
+  var audioCtx = new AudioContext()
+  var epsilon = 0.00001
+  var types = ['sine', 'square', 'triangle', 'sawtooth']
+
+  var note = function (frequency, duration, type) {
+    var oscillator = audioCtx.createOscillator()
+    oscillator.type = type
+    oscillator.frequency.value = frequency
+
+    var gainNode = audioCtx.createGain()
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioCtx.destination)
+
+    oscillator.start()
+
+    gainNode.gain.exponentialRampToValueAtTime(epsilon, audioCtx.currentTime + duration)
+  }
+
+  var rand = function (list) {
+    var index = Math.floor(Math.random() * list.length);
+    return list[index];
+  }
+
+  setInterval(function () {
+
+    note(440.0, 0.1, rand(types))
+
+  }, 500)
+
+</script>
+</body>
+</html>
