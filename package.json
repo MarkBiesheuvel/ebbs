@@ -1,0 +1,17 @@
+{
+  "name": "-",
+  "version": "0.0.0",
+  "description": "Inspired by TidalCycles",
+  "main": "index.html",
+  "author": "Mark Biesheuvel <mail@markbiesheuvel.nl>",
+  "license": "MIT",
+  "scripts": {
+    "start": "gulp"
+  },
+  "devDependencies": {
+    "babel-preset-es2016": "^6.16.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
+    "pump": "^1.0.2"
+  }
+}
