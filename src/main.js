@@ -1,7 +1,8 @@
 const audioCtx = new AudioContext()
 const urlMap = {
   bd: 'Dirt-Samples/bd/BT3AADA.wav',
-  sn: 'Dirt-Samples/sn/ST3TAS3.wav'
+  sn: 'Dirt-Samples/sn/ST3TAS3.wav',
+  hh: 'Dirt-Samples/hh/000_hh3closedhh.wav'
 }
 let bufferMap = {}
 
@@ -81,6 +82,18 @@ const sequence = (...callbacks) => {
     })
 
     return p
+  }
+}
+
+const parallel = (...callbacks) => {
+
+  return (timing) => {
+
+    const p = callbacks.map((callback) => {
+      return callback(timing)
+    })
+
+    return Promise.all(p)
   }
 }
 
