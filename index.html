@@ -9,46 +9,22 @@
 </head>
 <body>
 
+<script src="src/main.js"></script>
 <script>
-  var audioCtx = new AudioContext()
-  var buffers = {};
 
-  function loadSample (key, url) {
-    var request = new XMLHttpRequest()
-    request.open('GET', url, true)
-    request.responseType = 'arraybuffer'
-
-    // Decode asynchronously
-    request.onload = function () {
-      audioCtx.decodeAudioData(request.response, function (buffer) {
-        buffers[key] = buffer
-      }, function (err) {
-        console.error(err)
-      })
-    }
-    request.send()
-  }
-
-  function playSound (key) {
-    var source = audioCtx.createBufferSource()
-    source.buffer = buffers[key]
-    source.connect(audioCtx.destination)
-    source.start(0)
-  }
-
-  loadSample('bd', 'Dirt-Samples/bd/BT3AADA.wav')
-  loadSample('sn', 'Dirt-Samples/sn/ST3TAS3.wav')
+  var bd = sample('bd')
+  var sn = sample('sn')
 
   setTimeout(function () {
-    playSound('bd')
+    bd()
   }, 1000)
 
   setTimeout(function () {
-    playSound('sn')
+    sn()
   }, 2000)
 
   setTimeout(function () {
-    playSound('bd')
+    sn()
   }, 3000)
 
 </script>
