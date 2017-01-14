@@ -1,13 +1,24 @@
 const audioCtx = new AudioContext()
 const urlMap = {
-  'bd': 'Dirt-Samples/bd/BT3AADA.wav',
-  'sn': 'Dirt-Samples/sn/ST3TAS3.wav'
+  bd: 'Dirt-Samples/bd/BT3AADA.wav',
+  sn: 'Dirt-Samples/sn/ST3TAS3.wav'
 }
 let bufferMap = {}
 
+const promise = (timing) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (document.hasFocus()) {
+        resolve()
+      } else {
+        reject()
+      }
+    }, timing)
+  })
+}
+
 const silence = () => {
-  return () => {
-  }
+  return promise
 }
 
 const sample = (key) => {
@@ -16,6 +27,7 @@ const sample = (key) => {
     console.warn(`Invalid sample: ${key}`)
     return silence;
   }
+
   if (!(key in bufferMap)) {
 
     fetch(urlMap[key])
@@ -31,7 +43,10 @@ const sample = (key) => {
       })
   }
 
-  return () => {
+  return (timing = 1000) => {
+
+    const p = promise(timing)
+
     // Still check if buffer is already loaded
     if (key in bufferMap) {
       let source = audioCtx.createBufferSource()
@@ -39,31 +54,40 @@ const sample = (key) => {
       source.connect(audioCtx.destination)
       source.start(0)
     }
+
+    return p
   }
 }
 
 const sequence = (...callbacks) => {
-  return () => {
-    callbacks.forEach((callback, i) => {
-      setTimeout(callback, i * 500)
-    })
-  }
-}
+  return (timing) => {
 
-const parallel = (...callbacks) => {
-  return () => {
+    // Cannot make a sequence without sounds
+    if (callbacks.length === 0) {
+      return promise(timing)
+    }
+
+    // Divide timing
+    timing /= callbacks.length
+
+    // Start with default promise
+    let p = Promise.resolve()
+
+    // Chain promises together
     callbacks.forEach((callback) => {
-      callback()
+      p = p.then(() => {
+        return callback(timing)
+      })
     })
+
+    return p
   }
 }
 
-const loop = (interval, callback) => {
-  const tmp = setInterval(callback, interval)
-
-  // Easy way to stop the loop
-  document.addEventListener("click", () => {
-    clearInterval(tmp)
-  });
+const loop = (timing, callback) => {
+  callback(timing)
+    .then(() => {
+      loop(timing, callback)
+    })
 }
 

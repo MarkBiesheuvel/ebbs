@@ -12,7 +12,8 @@
 <script src="dist/main.js"></script>
 <script>
 
-  loop(1000, sequence(sample('bd'), sample('sn')))
+  loop(1000, sequence(sample('bd'), sample('sn'), silence(), sample('sn')))
+  //  loop(1000, sample('sn'))
 
 </script>
 </body>
