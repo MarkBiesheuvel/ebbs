@@ -12,20 +12,7 @@
 <script src="src/main.js"></script>
 <script>
 
-  var bd = sample('bd')
-  var sn = sample('sn')
-
-  setTimeout(function () {
-    bd()
-  }, 1000)
-
-  setTimeout(function () {
-    sn()
-  }, 2000)
-
-  setTimeout(function () {
-    sn()
-  }, 3000)
+  loop(1000, sequence(sample('bd'), sample('sn')))
 
 </script>
 </body>

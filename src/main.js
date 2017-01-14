@@ -6,7 +6,9 @@ var urlMap = {
 var bufferMap = {}
 
 var silence = function () {
+  return function () {
 
+  }
 }
 
 var sample = function (key) {
@@ -41,3 +43,32 @@ var sample = function (key) {
     }
   }
 }
+
+var sequence = function () {
+
+  var callbacks = arguments
+  var n = callbacks.length
+
+  return function () {
+    for (var i = 0; i < n; i++) {
+      setTimeout(callbacks[i], i * 500)
+    }
+  }
+}
+
+var parallel = function () {
+
+  var callbacks = arguments
+  var n = callbacks.length
+
+  return function () {
+    for (var i = 0; i < n; i++) {
+      setTimeout(callbacks[i], i * 500)
+    }
+  }
+}
+
+var loop = function (interval, callback) {
+  setInterval(callback, interval)
+}
+
