@@ -13,6 +13,10 @@ const defaultDestination = audioCtx.destination
 
 // Helper functions
 
+/**
+ * @param {Number} timing - The amount of milliseconds to wait
+ * @returns {Promise} - A promise
+ */
 const promise = (timing) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -25,8 +29,13 @@ const promise = (timing) => {
   })
 }
 
-// @source http://stackoverflow.com/a/22313408/825547
-// @see http://kevincennis.github.io/transfergraph/
+
+/**
+ * @see {@link http://stackoverflow.com/a/22313408/825547}
+ * @see {@link http://kevincennis.github.io/transfergraph/}
+ * @param {Number} amount
+ * @returns {Float32Array}
+ */
 const curve = (amount = 50) => {
 
   const N = 44100
@@ -43,10 +52,27 @@ const curve = (amount = 50) => {
 
 // Play functions
 
+/**
+ *
+ * @returns {function(Number=, AudioNode=)}
+ */
 const silence = () => {
-  return promise
+  /**
+   * @param {Number} timing - The amount of milliseconds this sound may take
+   * @param {AudioNode} destination - The audioNode to which the sound needs to be connected
+   * @returns {Promise} - A promise that will be resolved when the sounds is done
+   */
+  const inner = (timing = defaultTiming, destination = defaultDestination) => {
+    return promise(timing)
+  }
+
+  return inner
 }
 
+/**
+ * @param {String} - The key of the sound to play
+ * @return {sequence~inner} - The resulting sound function
+ */
 const sample = (key) => {
 
   if (!(key in urlMap)) {
@@ -69,7 +95,12 @@ const sample = (key) => {
       })
   }
 
-  return (timing = defaultTiming, destination = defaultDestination) => {
+  /**
+   * @param {Number} timing - The amount of milliseconds this sound may take
+   * @param {AudioNode} destination - The audioNode to which the sound needs to be connected
+   * @returns {Promise} - A promise that will be resolved when the sounds is done
+   */
+  const inner = (timing = defaultTiming, destination = defaultDestination) => {
 
     const p = promise(timing)
 
@@ -83,19 +114,38 @@ const sample = (key) => {
 
     return p
   }
+
+  return inner
 }
 
+/**
+ * @param {Number} value - The volume to play the sound at
+ * @param {...Function} callbacks - The sound function to play
+ * @return {sequence~inner} - The resulting sound function
+ */
 const volume = (value, callback) => {
 
   const gainNode = audioCtx.createGain()
   gainNode.gain.value = value
 
-  return (timing = defaultTiming, destination = defaultDestination) => {
+  /**
+   * @param {Number} timing - The amount of milliseconds this sound may take
+   * @param {AudioNode} destination - The audioNode to which the sound needs to be connected
+   * @returns {Promise} - A promise that will be resolved when the sounds is done
+   */
+  const inner = (timing = defaultTiming, destination = defaultDestination) => {
     gainNode.connect(destination)
     return callback(timing, gainNode)
   }
+
+  return inner
 }
 
+/**
+ * @param {Number} value - The amount of distortion
+ * @param {...Function} callbacks - The sound function to play
+ * @return {sequence~inner} - The resulting sound function
+ */
 const distortion = (value, callback) => {
 
   const waveShaperNode = audioCtx.createWaveShaper()
@@ -103,15 +153,31 @@ const distortion = (value, callback) => {
   waveShaperNode.curve = curve(value)
   waveShaperNode.oversample = '4x'
 
-  return (timing = defaultTiming, destination = defaultDestination) => {
+  /**
+   * @param {Number} timing - The amount of milliseconds this sound may take
+   * @param {AudioNode} destination - The audioNode to which the sound needs to be connected
+   * @returns {Promise} - A promise that will be resolved when the sounds is done
+   */
+  const inner = (timing = defaultTiming, destination = defaultDestination) => {
     waveShaperNode.connect(destination)
     return callback(timing, waveShaperNode)
   }
+
+  return inner
 }
 
+/**
+ *
+ * @param {...Function} callbacks - The sound functions to play in sequence
+ * @return {sequence~inner} - The resulting sound function
+ */
 const sequence = (...callbacks) => {
-
-  return (timing = defaultTiming, destination = defaultDestination) => {
+  /**
+   * @param {Number} timing - The amount of milliseconds this sound may take
+   * @param {AudioNode} destination - The audioNode to which the sound needs to be connected
+   * @returns {Promise} - A promise that will be resolved when the sounds is done
+   */
+  const inner = (timing = defaultTiming, destination = defaultDestination) => {
 
     // Cannot make a sequence without sounds
     if (callbacks.length === 0) {
@@ -133,11 +199,22 @@ const sequence = (...callbacks) => {
 
     return p
   }
+
+  return inner
 }
 
+/**
+ *
+ * @param {...Function} callbacks - The sound functions to play in parallel
+ * @return {parallel~inner} - The resulting sound function
+ */
 const parallel = (...callbacks) => {
-
-  return (timing = defaultTiming, destination = defaultDestination) => {
+  /**
+   * @param {Number} timing - The amount of milliseconds this sound may take
+   * @param {AudioNode} destination - The audioNode to which the sound needs to be connected
+   * @returns {Promise} - A promise that will be resolved when the sounds is done
+   */
+  const inner = (timing = defaultTiming, destination = defaultDestination) => {
 
     const p = callbacks.map((callback) => {
       return callback(timing, destination)
@@ -145,16 +222,28 @@ const parallel = (...callbacks) => {
 
     return Promise.all(p)
   }
+
+  return inner
 }
 
+/**
+ * @param {Function} - The sound function that needs to be looped
+ * @return {loop~inner} - The resulting sound function
+ */
 const loop = (callback) => {
-
+  /**
+   * @param {Number} timing - The amount of milliseconds this sound may take
+   * @param {AudioNode} destination - The audioNode to which the sound needs to be connected
+   * @returns {Promise} - A promise that will be resolved when the sounds is done
+   */
   const inner = (timing = defaultTiming, destination = defaultDestination) => {
 
     callback(timing, destination)
       .then(() => {
         inner(timing, destination)
       })
+
+    return new Promise()
   }
 
   return inner
