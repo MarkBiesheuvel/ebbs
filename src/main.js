@@ -260,6 +260,11 @@ const sample = (key) => {
   return inner
 }
 
+/**
+ * @param {String} key - The key of the note to play
+ * @param {string} type - The tyoeif wave function to use
+ * @returns {note~inner} - The resulting sound function
+ */
 const note = (key, type = 'sine') => {
 
   if (!(key in frequencyMap)) {
@@ -340,7 +345,6 @@ const distortion = (value, callback) => {
 }
 
 /**
- *
  * @param {...Function} callbacks - The sound functions to play in sequence
  * @return {sequence~inner} - The resulting sound function
  */
@@ -377,7 +381,6 @@ const sequence = (...callbacks) => {
 }
 
 /**
- *
  * @param {...Function} callbacks - The sound functions to play in parallel
  * @return {parallel~inner} - The resulting sound function
  */
@@ -394,6 +397,37 @@ const parallel = (...callbacks) => {
     })
 
     return Promise.all(p)
+  }
+
+  return inner
+}
+
+/**
+ * @param {...Function} callbacks - The sound functions to alternate between
+ * @return {parallel~inner} - The resulting sound function
+ */
+const alternate = (...callbacks) => {
+
+  const N = callbacks.length
+
+  if (N === 0) {
+    return silence()
+  }
+
+  let i = 0
+
+  /**
+   * @param {Number} timing - The amount of milliseconds this sound may take
+   * @param {AudioNode} destination - The audioNode to which the sound needs to be connected
+   * @returns {Promise} - A promise that will be resolved when the sounds is done
+   */
+  const inner = (timing = defaultTiming, destination = defaultDestination) => {
+
+    const p = callbacks[i](timing, destination)
+
+    i = (i + 1) % N
+
+    return p
   }
 
   return inner
