@@ -14,22 +14,14 @@
 
   play(
     loop(
-      parallel(
-        volume(0.5,
-          sequence(
-            sample('numbers:0'),
-            sample('numbers:1')
-          )
-        ),
-        sequence(
-          sample('hh'),
-          sample('hh'),
-          sample('hh'),
-          sample('bd')
-        )
+      sequence(
+        note('A3'),
+        note('C3'),
+        note('G3'),
+        sample('numbers:0')
       )
     ),
-    30, // 30 bpm
+    25, // 10 bpm
     2 // 2 seconds delay
   )
 
