@@ -12,10 +12,23 @@
 <script src="dist/main.js"></script>
 <script>
 
-  loop(1000,
+  loop(2000,
     parallel(
-      sequence(sample('bd'), sample('sn'), silence(), sample('sn')),
-      sequence(sample('hh'), sample('hh'), sample('hh'), sample('hh'))
+      sequence(
+        volume(2, sample('bd')),
+        sample('sn'),
+        silence(),
+        sample('sn')
+      ),
+      volume(
+        0.5,
+        sequence(
+          sample('hh'),
+          sample('hh'),
+          sample('hh'),
+          sample('hh')
+        )
+      )
     )
   )
 

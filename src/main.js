@@ -6,6 +6,9 @@ const urlMap = {
 }
 let bufferMap = {}
 
+const defaultTiming = 1000
+const defaultDestination = audioCtx.destination
+
 const promise = (timing) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -44,7 +47,7 @@ const sample = (key) => {
       })
   }
 
-  return (timing = 1000) => {
+  return (timing = defaultTiming, destination = defaultDestination) => {
 
     const p = promise(timing)
 
@@ -52,7 +55,7 @@ const sample = (key) => {
     if (key in bufferMap) {
       let source = audioCtx.createBufferSource()
       source.buffer = bufferMap[key]
-      source.connect(audioCtx.destination)
+      source.connect(destination)
       source.start(0)
     }
 
@@ -60,8 +63,21 @@ const sample = (key) => {
   }
 }
 
+const volume = (value, callback) => {
+
+  return (timing = defaultTiming, destination = defaultDestination) => {
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = value;
+
+    gainNode.connect(destination);
+
+    return callback(timing, gainNode)
+  }
+}
+
 const sequence = (...callbacks) => {
-  return (timing) => {
+
+  return (timing = defaultTiming, destination = defaultDestination) => {
 
     // Cannot make a sequence without sounds
     if (callbacks.length === 0) {
@@ -77,7 +93,7 @@ const sequence = (...callbacks) => {
     // Chain promises together
     callbacks.forEach((callback) => {
       p = p.then(() => {
-        return callback(timing)
+        return callback(timing, destination)
       })
     })
 
@@ -87,10 +103,10 @@ const sequence = (...callbacks) => {
 
 const parallel = (...callbacks) => {
 
-  return (timing) => {
+  return (timing = defaultTiming, destination = defaultDestination) => {
 
     const p = callbacks.map((callback) => {
-      return callback(timing)
+      return callback(timing, destination)
     })
 
     return Promise.all(p)
@@ -98,7 +114,7 @@ const parallel = (...callbacks) => {
 }
 
 const loop = (timing, callback) => {
-  callback(timing)
+  callback(timing, defaultDestination)
     .then(() => {
       loop(timing, callback)
     })
