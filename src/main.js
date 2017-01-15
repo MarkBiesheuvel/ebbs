@@ -33,8 +33,8 @@ const promise = (timing) => {
 /**
  * @see {@link http://stackoverflow.com/a/22313408/825547}
  * @see {@link http://kevincennis.github.io/transfergraph/}
- * @param {Number} amount
- * @returns {Float32Array}
+ * @param {Number} amount - The amount of distortion
+ * @returns {Float32Array} - An array representing the distortion curve
  */
 const curve = (amount = 50) => {
 
@@ -53,8 +53,7 @@ const curve = (amount = 50) => {
 // Play functions
 
 /**
- *
- * @returns {function(Number=, AudioNode=)}
+ * @return {silence~inner} - The resulting sound function
  */
 const silence = () => {
   /**
@@ -71,7 +70,7 @@ const silence = () => {
 
 /**
  * @param {String} - The key of the sound to play
- * @return {sequence~inner} - The resulting sound function
+ * @return {sample~inner} - The resulting sound function
  */
 const sample = (key) => {
 
@@ -121,7 +120,7 @@ const sample = (key) => {
 /**
  * @param {Number} value - The volume to play the sound at
  * @param {...Function} callbacks - The sound function to play
- * @return {sequence~inner} - The resulting sound function
+ * @return {volume~inner} - The resulting sound function
  */
 const volume = (value, callback) => {
 
@@ -144,7 +143,7 @@ const volume = (value, callback) => {
 /**
  * @param {Number} value - The amount of distortion
  * @param {...Function} callbacks - The sound function to play
- * @return {sequence~inner} - The resulting sound function
+ * @return {distortion~inner} - The resulting sound function
  */
 const distortion = (value, callback) => {
 
