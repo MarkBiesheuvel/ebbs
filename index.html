@@ -20,14 +20,11 @@
         silence(),
         sample('sn')
       ),
-      volume(
-        0.5,
-        sequence(
-          sample('hh'),
-          sample('hh'),
-          sample('hh'),
-          sample('hh')
-        )
+      sequence(
+        distortion(0, sample('hh')),
+        distortion(25, sample('hh')),
+        distortion(50, sample('hh')),
+        distortion(100, sample('hh'))
       )
     )
   )

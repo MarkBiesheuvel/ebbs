@@ -9,6 +9,8 @@ let bufferMap = {}
 const defaultTiming = 1000
 const defaultDestination = audioCtx.destination
 
+// Helper functions
+
 const promise = (timing) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -20,6 +22,24 @@ const promise = (timing) => {
     }, timing)
   })
 }
+
+// @source http://stackoverflow.com/a/22313408/825547
+// @see http://kevincennis.github.io/transfergraph/
+const curve = (amount = 50) => {
+
+  const N = 44100
+  const curve = new Float32Array(N)
+  const deg = Math.PI / 180
+
+  for (let i = 0; i < N; i++) {
+    const x = (i * 2 / N) - 1
+    curve[i] = (3 + amount) * x * 20 * deg / ( Math.PI + amount * Math.abs(x) )
+  }
+
+  return curve
+}
+
+// Play functions
 
 const silence = () => {
   return promise
@@ -65,13 +85,25 @@ const sample = (key) => {
 
 const volume = (value, callback) => {
 
+  const gainNode = audioCtx.createGain()
+  gainNode.gain.value = value
+
   return (timing = defaultTiming, destination = defaultDestination) => {
-    const gainNode = audioCtx.createGain();
-    gainNode.gain.value = value;
-
-    gainNode.connect(destination);
-
+    gainNode.connect(destination)
     return callback(timing, gainNode)
+  }
+}
+
+const distortion = (value, callback) => {
+
+  const waveShaperNode = audioCtx.createWaveShaper()
+
+  waveShaperNode.curve = curve(value)
+  waveShaperNode.oversample = '4x'
+
+  return (timing = defaultTiming, destination = defaultDestination) => {
+    waveShaperNode.connect(destination)
+    return callback(timing, waveShaperNode)
   }
 }
 
@@ -112,6 +144,8 @@ const parallel = (...callbacks) => {
     return Promise.all(p)
   }
 }
+
+// Loop function
 
 const loop = (timing, callback) => {
   callback(timing, defaultDestination)
