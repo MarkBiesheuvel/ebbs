@@ -2,7 +2,9 @@ const audioCtx = new AudioContext()
 const urlMap = {
   bd: 'Dirt-Samples/bd/BT3AADA.wav',
   sn: 'Dirt-Samples/sn/ST3TAS3.wav',
-  hh: 'Dirt-Samples/hh/000_hh3closedhh.wav'
+  hh: 'Dirt-Samples/hh/000_hh3closedhh.wav',
+  'numbers:0': 'Dirt-Samples/numbers/0.wav',
+  'numbers:1': 'Dirt-Samples/numbers/1.wav'
 }
 let bufferMap = {}
 
@@ -145,12 +147,26 @@ const parallel = (...callbacks) => {
   }
 }
 
-// Loop function
+const loop = (callback) => {
 
-const loop = (timing, callback) => {
-  callback(timing, defaultDestination)
-    .then(() => {
-      loop(timing, callback)
-    })
+  const inner = (timing = defaultTiming, destination = defaultDestination) => {
+
+    callback(timing, destination)
+      .then(() => {
+        inner(timing, destination)
+      })
+  }
+
+  return inner
 }
 
+// Start everything
+
+const play = (callback, bpm = 60, deplay = 4) => {
+
+  const timing = 60000 / bpm
+
+  setTimeout(() => {
+    callback(timing)
+  }, deplay * 1000)
+}
