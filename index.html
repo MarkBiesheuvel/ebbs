@@ -9,24 +9,59 @@
 </head>
 <body>
 
+<textarea id="input" style="width:100%;height:400px">
+loop(
+  parallel(
+    sequence(
+      note('A3'),
+      note('C3'),
+      note('G3'),
+      alternate(
+        sample('numbers:0'),
+        sample('numbers:1')
+      )
+    ),
+    sequence(
+      sample('hh'),
+      sample('hh'),
+      sample('hh'),
+      sample('hh'),
+      sample('bd'),
+      sample('hh'),
+      sample('hh'),
+      silence()
+    )
+  )
+)
+</textarea>
+<button id="play" style="width:100%;height:50px">Play</button>
+<button id="stop" style="width:100%;height:50px">Stop</button>
+
 <script src="dist/main.js"></script>
 <script>
 
-  play(
-    loop(
-      sequence(
-        note('A3'),
-        note('C3'),
-        note('G3'),
-        alternate(
-          sample('numbers:0'),
-          sample('numbers:1')
-        )
-      )
-    ),
-    25, // 25 bpm
-    0 // 0 seconds delay
-  )
+  var input = document.getElementById('input')
+  var playButton = document.getElementById('play')
+  var stopButton = document.getElementById('stop')
+
+  preload('hh')
+  preload('bd')
+  preload('sn')
+  preload('numbers:0')
+  preload('numbers:1')
+  preload('numbers:2')
+  preload('numbers:3')
+  preload('numbers:4')
+
+  playButton.addEventListener('click', function () {
+    var sound = eval(input.value)
+    stop()
+    play(sound, 25, 0)
+  })
+
+  stopButton.addEventListener('click', function () {
+    stop()
+  })
 
 </script>
 </body>

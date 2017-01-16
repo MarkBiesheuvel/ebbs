@@ -147,7 +147,10 @@ const urlMap = {
   sn: 'Dirt-Samples/sn/ST3TAS3.wav',
   hh: 'Dirt-Samples/hh/000_hh3closedhh.wav',
   'numbers:0': 'Dirt-Samples/numbers/0.wav',
-  'numbers:1': 'Dirt-Samples/numbers/1.wav'
+  'numbers:1': 'Dirt-Samples/numbers/1.wav',
+  'numbers:2': 'Dirt-Samples/numbers/2.wav',
+  'numbers:3': 'Dirt-Samples/numbers/3.wav',
+  'numbers:4': 'Dirt-Samples/numbers/4.wav'
 }
 let bufferMap = {}
 
@@ -163,7 +166,7 @@ const defaultDestination = audioCtx.destination
 const promise = (timing) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (document.hasFocus()) {
+      if (isPlaying) {
         resolve()
       } else {
         reject()
@@ -172,6 +175,28 @@ const promise = (timing) => {
   })
 }
 
+
+const preload = (key) => {
+
+  if (!(key in urlMap)) {
+    console.warn(`Invalid sample: ${key}`)
+    return silence();
+  }
+
+  if (!(key in bufferMap)) {
+    fetch(urlMap[key])
+      .then((response) => {
+        return response.arrayBuffer()
+      })
+      .then((buffer) => {
+        audioCtx.decodeAudioData(buffer, (buffer) => {
+          bufferMap[key] = buffer
+        }, (err) => {
+          console.error(err)
+        })
+      })
+  }
+}
 
 /**
  * @see {@link http://stackoverflow.com/a/22313408/825547}
@@ -217,25 +242,7 @@ const silence = () => {
  */
 const sample = (key) => {
 
-  if (!(key in urlMap)) {
-    console.warn(`Invalid sample: ${key}`)
-    return silence();
-  }
-
-  if (!(key in bufferMap)) {
-
-    fetch(urlMap[key])
-      .then((response) => {
-        return response.arrayBuffer()
-      })
-      .then((buffer) => {
-        audioCtx.decodeAudioData(buffer, (buffer) => {
-          bufferMap[key] = buffer
-        }, (err) => {
-          console.error(err)
-        })
-      })
-  }
+  preload(key)
 
   /**
    * @param {Number} timing - The amount of milliseconds this sound may take
@@ -404,7 +411,7 @@ const parallel = (...callbacks) => {
 
 /**
  * @param {...Function} callbacks - The sound functions to alternate between
- * @return {parallel~inner} - The resulting sound function
+ * @return {alternate~inner} - The resulting sound function
  */
 const alternate = (...callbacks) => {
 
@@ -445,25 +452,34 @@ const loop = (callback) => {
    */
   const inner = (timing = defaultTiming, destination = defaultDestination) => {
 
-    callback(timing, destination)
+    const p = callback(timing, destination)
       .then(() => {
         inner(timing, destination)
       })
 
-    return new Promise(() => {
-    })
+    return p
   }
 
   return inner
 }
 
 // Start everything
+let isPlaying = false
 
-const play = (callback, bpm = 60, deplay = 4) => {
+const play = (callback, bpm = 25, deplay = 2) => {
+
+  if (isPlaying) {
+    throw new Error('Can only one sound at a time')
+  }
+  isPlaying = true
 
   const timing = 60000 / bpm
 
   setTimeout(() => {
     callback(timing)
   }, deplay * 1000)
+}
+
+const stop = () => {
+  isPlaying = false
 }
