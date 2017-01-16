@@ -352,6 +352,38 @@ const distortion = (value, callback) => {
 }
 
 /**
+ * @param {Number} times - The number of times to repeat
+ * @param callback - The sound function to repeat
+ * @return {repeat~inner} - The resulting sound function
+ */
+const repeat = (times, callback) => {
+  /**
+   * @param {Number} timing - The amount of milliseconds this sound may take
+   * @param {AudioNode} destination - The audioNode to which the sound needs to be connected
+   * @returns {Promise} - A promise that will be resolved when the sounds is done
+   */
+  const inner = (timing = defaultTiming, destination = defaultDestination) => {
+
+    // Divide timing
+    timing /= times
+
+    // Start with default promise
+    let p = Promise.resolve()
+
+    // Chain promises together
+    for (let i = 0; i < times; i++) {
+      p = p.then(() => {
+        return callback(timing, destination)
+      })
+    }
+
+    return p
+  }
+
+  return inner
+}
+
+/**
  * @param {...Function} callbacks - The sound functions to play in sequence
  * @return {sequence~inner} - The resulting sound function
  */

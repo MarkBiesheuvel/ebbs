@@ -12,24 +12,21 @@
 <textarea id="input" style="width:100%;height:400px">
 loop(
   parallel(
-    sequence(
-      note('A3'),
-      note('C3'),
-      note('G3'),
-      alternate(
-        sample('numbers:0'),
-        sample('numbers:1')
-      )
+    repeat(8,
+      sample('hh')
     ),
     sequence(
-      sample('hh'),
-      sample('hh'),
-      sample('hh'),
-      sample('hh'),
       sample('bd'),
-      sample('hh'),
-      sample('hh'),
-      silence()
+      sample('sn'),
+      alternate(
+        sample('bd'),
+        repeat(2, sample('bd'))
+      ),
+      alternate(
+        sample('sn'),
+        repeat(2, sample('sn')),
+        repeat(4, sample('sn'))
+      )
     )
   )
 )
